@@ -28,6 +28,8 @@
         this.$notificationTimeout = null;
         this.$isSaving = false;
 
+        this.$loadContainer = this.$el.find('> .row > .field-notes-form .loading-indicator-container:first');
+
         // To avoid saving twice, when user using the command to saving
         this.$lastSavingNoteData = {
             id: 0,
@@ -348,6 +350,7 @@
     Notes.prototype.fetchSelectedNote = function(item , activeNameFiled = true){
         const aItem = item.find('a');
         const self = this;
+        this.$loadContainer.loadIndicator();
         aItem.request(this.makeEventHandler('onNoteActive'), {
             success: function(data, textStatus, jqXHR){
                 // To do the default success function
@@ -355,6 +358,7 @@
                 //rebinding the editor event
                 self.initRichEditor();
                 self.setLastSavingNoteData(self.getNoteData());
+                self.$loadContainer.loadIndicator('hide');
                 if(activeNameFiled){
                     const nameInput = self.$el.find('> .row > .field-notes-form  input:first');
                     //Place the cursor at the end of the input text
@@ -364,6 +368,10 @@
                     nameInput.focus();
                 }
             },
+            error: function(jqXHR, textStatus, error){
+                this.error(jqXHR, textStatus, error);
+                self.$loadContainer.loadIndicator('hide');
+            }
         });
     }
 

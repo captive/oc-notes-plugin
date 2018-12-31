@@ -17,7 +17,7 @@
             <?= $this->makePartial('notes_list'); ?>
         </div>
         <div id="contentForm" class="col-md-9 field-notes-form">
-            <div id="<?= $this->getId('content') ?>" class="content">
+            <div id="<?= $this->getId('content') ?>" class="content  loading-indicator-container indicator-center">
                 <?= count($notesList) > 0 ? $this->makePartial('note_content') : ''; ?>
             </div>
             <div class="loading-indicator-container field-notes-notification" hidden>

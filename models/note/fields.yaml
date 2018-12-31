@@ -1,0 +1,11 @@
+fields:
+    name:
+        type: text
+        label: ''
+        span: full
+        placeholder: captive.notes::lang.models.note.name
+    content:
+        type: richeditor
+        label: ''
+        stretch: true
+        placeholder: captive.notes::lang.models.note.content

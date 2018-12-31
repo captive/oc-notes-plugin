@@ -1,0 +1,21 @@
+{
+    "name": "captive/oc-notes-plugin",
+    "type": "october-plugin",
+    "description": "Add notes to any and all OctoberCMS models",
+    "homepage": "https://github.com/Captive/oc-notes-plugin",
+    "keywords": ["october", "octobercms", "notes", "dynamic notes", "mac notes"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Eric Yang",
+            "email": "ericy@captive.ca"
+        },
+        {
+            "name": "Luke Towers",
+            "email": "octobercms@luketowers.ca"
+        }
+    ],
+    "require": {
+        "composer/installers": "~1.0"
+    }
+}

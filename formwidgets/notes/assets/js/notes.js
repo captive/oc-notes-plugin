@@ -170,11 +170,11 @@
         const target = ev.target;
         target.blur();
         this.finishSavingProcess(function(){
-            target = $(target);
-            const val = target.val();
-            target.val('');
-            target.val(val);
-            target.focus();
+            const $target = $(target);
+            const val = $target.val();
+            $target.val('');
+            $target.val(val);
+            $target.focus();
         });
         return false;
     }

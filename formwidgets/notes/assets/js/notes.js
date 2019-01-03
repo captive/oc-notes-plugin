@@ -445,7 +445,7 @@
     }
 
     Notes.prototype.createNewNote = function(activeNameField = true) {
-        let firstListItem = this.$el.find(' > .field-notes-list > .field-notes-items li:first-child');
+        let firstListItem = this.$el.find('> .row > .field-notes-list > .field-notes-items li:first-child');
         if (firstListItem.length > 0 && firstListItem[0].hasAttribute('data-note-unsaved')) {
             $.oc.flashMsg({
                 text: 'Please save the new note first',

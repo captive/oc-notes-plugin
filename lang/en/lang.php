@@ -7,8 +7,7 @@
         'note' => [
             'label' => 'Note',
             'label_plural' => 'Notes',
-            'name'  => 'Name',
-            'content' => 'Content',
+            'name'  => 'Title',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'deleted_at' => 'Deleted At',

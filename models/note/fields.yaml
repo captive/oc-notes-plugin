@@ -8,4 +8,3 @@ fields:
         type: richeditor
         label: ''
         stretch: true
-        placeholder: captive.notes::lang.models.note.content

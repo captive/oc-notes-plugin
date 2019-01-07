@@ -13,10 +13,10 @@
     </div>
 
     <div class="row">
-        <div name="notesList" class="col-md-3 field-notes-list" id="<?= $this->getId('notesList') ?>">
+        <div name="notesList" class="field-notes-list" id="<?= $this->getId('notesList') ?>">
             <?= $this->makePartial('notes_list'); ?>
         </div>
-        <div id="contentForm" class="col-md-9 field-notes-form">
+        <div id="contentForm" class="field-notes-form">
             <div id="<?= $this->getId('content') ?>" class="content  loading-indicator-container indicator-center">
                 <?= count($notesList) > 0 ? $this->makePartial('note_content') : ''; ?>
             </div>

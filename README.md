@@ -32,6 +32,7 @@ tabs:
             type: notes
             span: full
             # autosaveDelay: 2000 # The amount of milliseconds to delay after typing stops to trigger an autosave
+            # dateFormat: 'Y-m-d H:i:s' # the php date format for updated_at column
 ```
 
 Example MorphMany Relationship definition:

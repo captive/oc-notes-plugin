@@ -33,6 +33,12 @@ class Notes extends FormWidgetBase
      */
     public $autosaveDelay = 2000;
 
+    /**
+     *
+     * @var string The note title updated_at column format
+     */
+    public $dateFormat = 'Y-m-d H:i:s';
+
     //
     // Internal properties
     //
@@ -85,6 +91,7 @@ class Notes extends FormWidgetBase
             'form',
             'nameFrom',
             'autosaveDelay',
+            'dateFormat'
         ]);
 
         if ($this->formField->disabled) {
@@ -301,7 +308,7 @@ class Notes extends FormWidgetBase
             $result[] = [
                 'id' => $noteModel->id,
                 'name' => $noteModel->name,
-                'updated_at' => $noteModel->updated_at,
+                'updated_at' => $noteModel->updated_at->format($this->dateFormat),
             ];
         }
         if (count($result)>0 && $this->activeNoteId ==0) {

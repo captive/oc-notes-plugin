@@ -23,6 +23,7 @@
         this.$el = $(element)
 
         this.$createNewNoteButton = this.$el.find('> .row > .toolbar  [data-note-add]');
+        this.$removeNoteButton = this.$el.find('> .row > .toolbar  [data-note-remove]');
 
         this.$richEditorTextarea = null;
         this.$notification = this.$el.find('> .row > .field-notes-form  .field-notes-notification');
@@ -450,6 +451,22 @@
         this.$createNewNoteButton.prop('disabled', !enable);
     }
 
+    Notes.prototype.setRemoveNoteButtonEnable = function (enable) {
+        this.$removeNoteButton.prop('disabled', !enable);
+    }
+
+    /**
+     * disable: When only new unsaved note exists in the list
+     */
+    Notes.prototype.resetRemoveNoteButtonEnable = function(firstNoteItem = null) {
+        firstNoteItem = firstNoteItem || this.$el.find('> .row > .field-notes-list > .field-notes-items li:first-child');
+        if (firstNoteItem.length == 0  || (firstNoteItem[0].hasAttribute('data-note-unsaved') && firstNoteItem.next().length === 0)) {
+            this.setRemoveNoteButtonEnable(false);
+        } else {
+            this.setRemoveNoteButtonEnable(true);
+        }
+    }
+
     Notes.prototype.createNewNote = function(activeNameField = true) {
 
         this.setCreateNewNoteButtonEnable(false);
@@ -463,6 +480,7 @@
             let newNote = self.$el.find('> .row > .field-notes-list > .field-notes-items li:first-child');
             self.fetchSelectedNote(newNote, activeNameField);
             self.notesListScrollToItem(newNote);
+            self.resetRemoveNoteButtonEnable(newNote);
             setTimeout(function () {
                 newNote.addClass(' show');
             }, 10);
@@ -507,6 +525,7 @@
         $(checkedItem).parent().remove();
 
         let firstNote = this.$el.find('> .row > .field-notes-list > .field-notes-items li:first-child');
+        this.resetRemoveNoteButtonEnable(firstNote);
         if (firstNote.length > 0) {
             this.notesListScrollToItem(firstNote);
             this.onClickNoteItem(null, firstNote.find('a'));
@@ -515,7 +534,6 @@
                 this.setCreateNewNoteButtonEnable(true);
             }
         }else{
-            this.setCreateNewNoteButtonEnable(true);
             //No note in the list now
             this.setLastSavingNoteData({
                 id:0,
@@ -523,6 +541,8 @@
                 content:''
             });
             this.clearNoteForm();
+            this.createDefaultNote();
+
         }
         $.oc.flashMsg({
             text: 'Remove note success',
@@ -552,6 +572,7 @@
                 checkedli.removeAttr('data-note-unsaved');
                 this.setCreateNewNoteButtonEnable(true);
             }
+            this.resetRemoveNoteButtonEnable();
         }
 
         this.hideNotification();

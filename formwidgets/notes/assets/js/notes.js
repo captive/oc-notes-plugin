@@ -606,6 +606,28 @@
 
     }
 
+    /**
+     * The default Note title/name should be the valid first line of the content
+     * when the name field is empty
+     */
+    Notes.prototype.setDefaultNoteName = function() {
+        const nameInput = this.$el.find('> .row > .field-notes-form  input:first');
+        if (nameInput.val().trim().length > 0) return;
+
+        const htmlView = this.$richEditorTextarea.parent().find('.fr-view');
+        let content = htmlView[0].outerText.trim();
+        if (content.length === 0) return;
+
+        const lines = content.split('\n');
+        let firstLine = '';
+        for (let i=0, len=lines.length; i < len; i++) {
+            firstLine = lines[i].trim();
+            if( firstLine.length > 0 ) break;
+        }
+        if (firstLine.length > 20) firstLine = firstLine.substring(0,20);
+        nameInput.val(firstLine);
+    }
+
     Notes.prototype.getActiveNoteID = function() {
         let noteIDData = this.getSelectedNoteIdData(); // id:10
         return (noteIDData) ? noteIDData.split(':')[1] : 0;
@@ -623,7 +645,6 @@
 
     Notes.prototype.postNoteData = function(onSuccessCallback = function(){}, onErrorCallback = function(){}){
         this.$isSaving  = true;
-
         // Get the note formdata
         let $form = this.$el.closest('form');
         let noteData = {
@@ -684,6 +705,7 @@
 
     Notes.prototype.onAutoSavingNote = function(ev){
         this.stopDelaySaving();
+        this.setDefaultNoteName();
         const self = this;
         // create a new timer;
         this.$savingTimeout = setTimeout(function() {

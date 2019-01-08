@@ -476,7 +476,7 @@
             let currentTime = new Date().toLocaleTimeString();
             self.clearNoteListCheckedStyle();
 
-            self.$el.find('> .row > .field-notes-list > .field-notes-items').prepend('<li data-note-unsaved class="fade field-notes-item"><a href="javascript:;"   data-request-data="id:0" class="checked"><div><h3>New note</h3><h4>' + currentTime + '</h4></div></a></li>');
+            self.$el.find('> .row > .field-notes-list > .field-notes-items').prepend('<li data-note-unsaved class="fade field-notes-item"><a href="javascript:;"   data-request-data="id:0" class="checked"><div><h3>New note</h3><h4>' + currentTime + '<span></span></h4></div></a></li>');
             let newNote = self.$el.find('> .row > .field-notes-list > .field-notes-items li:first-child');
             self.fetchSelectedNote(newNote, activeNameField);
             self.notesListScrollToItem(newNote);
@@ -563,7 +563,8 @@
         let checkedItem = this.getCheckedItem();
         if (checkedItem) {
             checkedItem.find('h3').text(data['name']);
-            checkedItem.find('h4').text(data['updated_at']);
+            checkedItem.find('h4').html(data['updated_at'] + ' <span>' + data['abstract'] + '</span>');
+
             checkedItem.attr('data-request-data', 'id:' + data['id']);
             // Need to update the internal data same time.
             checkedItem.data('request-data', 'id:' + data['id']);
@@ -618,7 +619,7 @@
         let content = htmlView[0].outerText.trim();
         if (content.length === 0) return;
 
-        const lines = content.split('\n');
+        const lines = content.split(/\r|\n/);
         let firstLine = '';
         for (let i=0, len=lines.length; i < len; i++) {
             firstLine = lines[i].trim();

@@ -1,9 +1,11 @@
 <?php namespace Captive\Notes\FormWidgets;
 
+use Log;
 use Response;
 use ApplicationException;
 use Backend\Classes\FormField;
 use Backend\Classes\FormWidgetBase;
+use October\Rain\Html\HtmlBuilder;
 
 use Captive\Notes\Models\Note;
 
@@ -292,7 +294,7 @@ class Notes extends FormWidgetBase
         //By searching controller in Toolbar
         $key = $this->searchTerm;
 
-        $query = $this->getRelation()->select('id', 'name', 'updated_at')->orderby('updated_at', 'desc');
+        $query = $this->getRelation()->select('id', 'name', 'content', 'updated_at')->orderby('updated_at', 'desc');
 
         //searching
         if(!empty($key)){
@@ -308,6 +310,7 @@ class Notes extends FormWidgetBase
             $result[] = [
                 'id' => $noteModel->id,
                 'name' => $noteModel->name,
+                'abstract' => $this->getContentAbstract($noteModel->content, $noteModel->name),
                 'updated_at' => $noteModel->updated_at->format($this->dateFormat),
             ];
         }
@@ -342,9 +345,31 @@ class Notes extends FormWidgetBase
         $note->delete();
     }
 
+    private function getContentAbstract($content = '', $name = '')
+    {
+        $plainText = HtmlBuilder::strip($content);
+        $lines = preg_split('/$\R?^/m', $plainText);
+
+        $abstract = '';
+        foreach ($lines as $line) {
+            $line = trim($line,'&nbsp;');
+            if ( $line !== "\t" && $line !== $name ){
+                $len = strlen($line);
+                if ($len > 0) {
+                    $abstract = $len == 15 ? $line :  str_limit($line, 12, '...');
+                    break;
+                }
+            }
+        }
+        return $abstract;
+
+    }
+
     public function onSaveNote()
     {
         $data = $this->getFormWidget()->getSaveData();
+        $content = $data['content'];
+
 
         // Get the active note
         $note = $this->getActiveNote();
@@ -361,7 +386,8 @@ class Notes extends FormWidgetBase
         return Response::json([
             'id'         => $note['id'] ,
             'name'       => $data['name'],
-            'updated_at' => $note['updated_at']->toDateTimeString(),
+            'abstract' => $this->getContentAbstract($data['content'], $data['name']),
+            'updated_at' => $note['updated_at']->format($this->dateFormat),
         ]);
     }
 }

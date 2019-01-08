@@ -68,6 +68,9 @@
         [class*=" oc-icon-"]:hover:before {
             color:white;
         }
+        [class*=" oc-icon-"]:disabled:before {
+            color: fade(black, 30%);
+        }
 
         .btn-icon {
             height: 1.5em;
@@ -79,9 +82,12 @@
             border: 1px solid #d1d6da;
         }
         .btn-icon:hover{
-            // filter: brightness(85%);
             background: #4390d2;
         }
+        .btn-icon:hover:disabled {
+            background: white;
+        }
+
     }
     .field-notes-list {
         background: @list_background_color;

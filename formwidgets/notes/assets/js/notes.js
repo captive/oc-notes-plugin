@@ -22,6 +22,8 @@
 
         this.$el = $(element)
 
+        this.$createNewNoteButton = this.$el.find('> .row > .toolbar  [data-note-add]');
+
         this.$richEditorTextarea = null;
         this.$notification = this.$el.find('> .row > .field-notes-form  .field-notes-notification');
         this.$savingTimeout = null;
@@ -444,16 +446,13 @@
         this.createNewNote();
     }
 
+    Notes.prototype.setCreateNewNoteButtonEnable = function(enable) {
+        this.$createNewNoteButton.prop('disabled', !enable);
+    }
+
     Notes.prototype.createNewNote = function(activeNameField = true) {
-        let firstListItem = this.$el.find('> .row > .field-notes-list > .field-notes-items li:first-child');
-        if (firstListItem.length > 0 && firstListItem[0].hasAttribute('data-note-unsaved')) {
-            $.oc.flashMsg({
-                text: 'Please save the new note first',
-                'class': 'warning',
-                'interval': 2
-            });
-            return;
-        }
+
+        this.setCreateNewNoteButtonEnable(false);
         const self = this;
 
         this.finishSavingProcess(function(){
@@ -511,7 +510,12 @@
         if (firstNote.length > 0) {
             this.notesListScrollToItem(firstNote);
             this.onClickNoteItem(null, firstNote.find('a'));
+            //Check unsaved note
+            if (!firstNote[0].hasAttribute('data-note-unsaved')){
+                this.setCreateNewNoteButtonEnable(true);
+            }
         }else{
+            this.setCreateNewNoteButtonEnable(true);
             //No note in the list now
             this.setLastSavingNoteData({
                 id:0,
@@ -546,6 +550,7 @@
             let checkedli = checkedItem.parent();
             if (checkedli[0].hasAttribute('data-note-unsaved')) {
                 checkedli.removeAttr('data-note-unsaved');
+                this.setCreateNewNoteButtonEnable(true);
             }
         }
 

@@ -54,6 +54,13 @@
 }
 
 .field-notes {
+    &.form-group-preview{
+        .toolbar {
+            .btn-icon {
+                visibility: hidden;
+            }
+        }
+    }
 
     .toolbar {
         padding-left: 0;
@@ -190,7 +197,21 @@
                 .field-richeditor {
                     height: ~"calc(100% - 58px) !important";
                 }
+                .form-group-preview {
+                    > span {
+                        white-space: nowrap;
+                        overflow: hidden;
+                    }
+                    > div {
+                        &.form-control{
+                            height: ~"calc(100% - 58px) !important";
+                            overflow-y: auto !important;
+                            position: absolute !important;
+                        }
+                    }
+                }
             }
+
             .loading-indicator{
                 background: @content_background_color;
             }

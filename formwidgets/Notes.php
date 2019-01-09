@@ -132,6 +132,7 @@ class Notes extends FormWidgetBase
         // Initialize the Form widget
         $this->formWidget = $this->makeWidget('Backend\Widgets\Form', $config);
         $this->formWidget->bindToController();
+        $this->formWidget->previewMode = $this->previewMode;
 
         return $this->formWidget;
     }
@@ -161,6 +162,8 @@ class Notes extends FormWidgetBase
         $this->toolbarWidget->bindToController();
         $this->toolbarWidget->controller->addViewPath($this->viewPath);
         $this->toolbarWidget->cssClasses[] = 'list-header';
+        $this->toolbarWidget->previewMode = $this->previewMode;
+
 
         /*
          * Link the Search Widget to the Notes Widget
@@ -367,26 +370,26 @@ class Notes extends FormWidgetBase
 
     public function onSaveNote()
     {
-        $data = $this->getFormWidget()->getSaveData();
-        $content = $data['content'];
-
 
         // Get the active note
         $note = $this->getActiveNote();
 
-        // Update an existing note or create a new one
-        if ($note->exists) {
-            $note->fill($data);
-            $note->save();
-        } else {
-            $note = $this->getRelation()->create($data, $this->sessionKey);
+        if (!$this->previewMode){
+            $data = $this->getFormWidget()->getSaveData();
+            // Update an existing note or create a new one
+            if ($note->exists) {
+                $note->fill($data);
+                $note->save();
+            } else {
+                $note = $this->getRelation()->create($data, $this->sessionKey);
+            }
         }
 
         // Update the note in the sidebar list
         return Response::json([
             'id'         => $note['id'] ,
-            'name'       => $data['name'],
-            'abstract' => $this->getContentAbstract($data['content'], $data['name']),
+            'name'       => $note['name'],
+            'abstract' => $this->getContentAbstract($note['content'], $note['name']),
             'updated_at' => $note['updated_at']->format($this->dateFormat),
         ]);
     }

@@ -52,20 +52,23 @@
 
     Notes.DEFAULTS = {
         alias: null,
-        autosaveDelay: 2000
+        autosaveDelay: 2000,
+        previewMode: false,
     }
 
     Notes.prototype.initRichEditor = function () {
         //Because the richeditor will refresh
         this.disposeRichEditor();
         this.$richEditorTextarea = this.$el.find('> .row > .field-notes-form  textarea:first');
-        if (this.$richEditorTextarea) {
+        if (this.$richEditorTextarea == null || this.$richEditorTextarea.length == 0) return;
+        if (!this.options.previewMode) {
             this.$richEditorTextarea.on('froalaEditor.contentChanged', this.proxy(this.onAutoSavingNote));
             this.$richEditorTextarea.on('keydown.oc.richeditor', this.proxy(this.stopDelaySaving));
         }
     }
     Notes.prototype.disposeRichEditor = function () {
-        if (this.$richEditorTextarea){
+        if (this.$richEditorTextarea == null || this.$richEditorTextarea.length == 0) return;
+        if (!this.options.previewMode) {
             this.$richEditorTextarea.off('froalaEditor.contentChanged', this.proxy(this.onAutoSavingNote) );
             this.$richEditorTextarea.off('keydown.oc.richeditor', this.proxy(this.stopDelaySaving));
             this.$richEditorTextarea  = null;
@@ -243,6 +246,7 @@
      *
      */
     Notes.prototype.bindingOldHotkeys = function() {
+        if (this.options.previewMode) return;
         let $form = this.$el.closest('form');
         let self = this;
         $form.find('[data-hotkey]').each(function(index,elem)
@@ -276,6 +280,7 @@
     }
 
     Notes.prototype.unbindOldHotkeyElements = function() {
+        if (this.options.previewMode) return;
         for (let item of this.$oldHotkeyElements){
             let elem = item.elem;
             let hotkey = elem.data('oc.hotkey');
@@ -690,12 +695,12 @@
     }
 
     Notes.prototype.testSavingConditions = function(){
-        if (this.$isSaving){
+        if (this.$isSaving || this.options.previewMode){
             return false;
         }
         let noteData = this.getNoteData();
         if (
-            this.$lastSavingNoteData.id = noteData.id
+            this.$lastSavingNoteData.id == noteData.id
             && this.$lastSavingNoteData.name == noteData.name
             && this.$lastSavingNoteData.content == noteData.content
         ){

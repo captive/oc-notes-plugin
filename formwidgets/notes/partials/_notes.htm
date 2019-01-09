@@ -1,8 +1,9 @@
 <div
-    class="field-notes"
+    class="field-notes  <?= $this->previewMode ? 'form-group-preview' : '' ?>"
     data-control="fieldnotes"
     data-alias="<?= $this->alias; ?>"
     <?= !empty($this->autosaveDelay) ? 'data-autosave-delay="' . $this->autosaveDelay . '"' : '' ?>
+    <?= !empty($this->previewMode) ? 'data-preview-mode="' . $this->previewMode . '"' : '' ?>
 >
     <div class="row">
         <div class="col-md-12 toolbar">

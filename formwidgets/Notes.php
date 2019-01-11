@@ -96,7 +96,7 @@ class Notes extends FormWidgetBase
             'dateFormat'
         ]);
 
-        if ($this->formField->disabled) {
+        if ($this->formField->disabled || $this->formField->readOnly) {
             $this->previewMode = true;
         }
 

@@ -312,7 +312,7 @@ class Notes extends FormWidgetBase
         }
 
         $noteModelList = $query->get();
-        if ( empty($key) && $noteModelList->count() === 0 ){
+        if ( empty($key) && $noteModelList->count() === 0 && !$this->previewMode ){
             $noteModelList = [$this->getFormWidget()->model];
         }
 

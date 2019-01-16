@@ -165,6 +165,9 @@
      * Create a new default note when the note list is empty
      */
     Notes.prototype.createDefaultNote = function() {
+        if (this.options.previewMode) {
+            return;
+        }
         const notesList = this.$el.find('> .row > .field-notes-list');
         if(notesList.find('> ul > li').length == 0){
             this.createNewNote(false);
@@ -454,10 +457,14 @@
 
     Notes.prototype.setCreateNewNoteButtonEnable = function(enable) {
         this.$createNewNoteButton.prop('disabled', !enable);
+        var title = enable ? 'Add new note' : 'Finish saving this note before you can add a new one';
+        this.$createNewNoteButton.attr('title', title);
     }
 
     Notes.prototype.setRemoveNoteButtonEnable = function (enable) {
         this.$removeNoteButton.prop('disabled', !enable);
+        var title = enable ? 'Delete note' : 'Note must exist before it can be deleted';
+        this.$removeNoteButton.attr('title', title);
     }
 
     /**
@@ -550,7 +557,7 @@
 
         }
         $.oc.flashMsg({
-            text: 'Remove note success',
+            text: 'Note has been deleted',
             'class': 'success',
             'interval': 2
         });
@@ -729,15 +736,9 @@
         let target = $(ev.target);
         let noteName = target.val();
         if (noteName == ''){
-            $.oc.flashMsg({
-                text: 'Note name can not be empty!',
-                'class': 'error',
-                'interval': 2
-            });
-            return;
+            this.setDefaultNoteName();
         }
         this.onAutoSavingNote(ev);
-
     }
 
     Notes.prototype.disableEnterSubmit = function(ev){

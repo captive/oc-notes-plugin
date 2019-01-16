@@ -164,7 +164,6 @@ class Notes extends FormWidgetBase
         $this->toolbarWidget->cssClasses[] = 'list-header';
         $this->toolbarWidget->previewMode = $this->previewMode;
 
-
         /*
          * Link the Search Widget to the Notes Widget
          */
@@ -239,6 +238,10 @@ class Notes extends FormWidgetBase
      */
     public function prepareVars()
     {
+        if ($this->formField->disabled || $this->formField->readOnly) {
+            $this->previewMode = true;
+        }
+
         $this->vars['notesList'] = $this->loadNotesList();
         $this->vars['formWidget'] = $this->getFormWidget();
         $this->vars['toolbar'] = $this->getToolbarWidget();
@@ -317,7 +320,7 @@ class Notes extends FormWidgetBase
                 'updated_at' => $noteModel->updated_at->format($this->dateFormat),
             ];
         }
-        if (count($result)>0 && $this->activeNoteId ==0) {
+        if (count($result) > 0 && empty($this->activeNoteId)) {
             // the first item is selected by default
             $this->activeNoteId = $result[0]['id'];
         }

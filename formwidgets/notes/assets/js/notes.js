@@ -110,13 +110,15 @@
             // Because it is invoked by <?= $this->makePartial('note_content'); ?> in _notes.htm
             self.setLastSavingNoteData();
             self.bindingOldHotkeys();
+            //Disable the create/delete button when there is only one 'new note' left
+            self.resetRemoveNoteButtonEnable();
+            self.resetCreateNewNoteButtonEnable();
         });
 
 
 
         this.$el.on('dispose-control', this.proxy(this.dispose))
 
-        this.createDefaultNote();
 
     }
 
@@ -370,6 +372,7 @@
                 self.initRichEditor();
                 self.setLastSavingNoteData(self.getNoteData());
                 self.$loadContainer.loadIndicator('hide');
+
                 if(activeNameFiled){
                     const nameInput = self.$el.find('> .row > .field-notes-form  input:first');
                     //Place the cursor at the end of the input text
@@ -389,6 +392,8 @@
     Notes.prototype.onSearchResultsRefreshForm = function() {
         this.initRichEditor(); // need to bind the events
         this.setLastSavingNoteData(this.getNoteData());
+        this.resetCreateNewNoteButtonEnable();
+        this.resetRemoveNoteButtonEnable();
     }
 
 
@@ -467,11 +472,23 @@
         this.$removeNoteButton.attr('title', title);
     }
 
+    Notes.prototype.getFirstNoteItem = function() {
+        return this.$el.find('> .row > .field-notes-list > .field-notes-items li:first-child');
+    }
+
+    Notes.prototype.resetCreateNewNoteButtonEnable = function () {
+        const firstNoteItem = this.getFirstNoteItem();
+        if (firstNoteItem.length >0 && firstNoteItem[0].hasAttribute('data-note-unsaved') && firstNoteItem.next().length === 0) {
+            this.setCreateNewNoteButtonEnable(false);
+        }else{
+            this.setCreateNewNoteButtonEnable(true);
+        }
+    }
     /**
      * disable: When only new unsaved note exists in the list
      */
     Notes.prototype.resetRemoveNoteButtonEnable = function(firstNoteItem = null) {
-        firstNoteItem = firstNoteItem || this.$el.find('> .row > .field-notes-list > .field-notes-items li:first-child');
+        firstNoteItem = firstNoteItem || this.getFirstNoteItem();
         if (firstNoteItem.length == 0  || (firstNoteItem[0].hasAttribute('data-note-unsaved') && firstNoteItem.next().length === 0)) {
             this.setRemoveNoteButtonEnable(false);
         } else {

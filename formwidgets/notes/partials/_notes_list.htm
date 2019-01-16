@@ -1,6 +1,6 @@
 <ul class="field-notes-items">
     <?php foreach ($notesList as $index => $note): ?>
-        <li class="field-notes-item">
+        <li class="field-notes-item"  <?= $note['id'] == 0 ? 'data-note-unsaved': '' ?> >
             <a
                 href="javascript:;"
                 class="<?= $index === 0 ? 'checked' : ''; ?>"
@@ -8,7 +8,7 @@
             >
                 <div>
                     <h3>
-                        <?= e($note['name']) ?>
+                        <?= e( $note['id'] == 0 ? 'New Note' : $note['name']) ?>
                     </h3>
                     <h4>
                         <?= e($note['updated_at']) ?>

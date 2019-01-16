@@ -1,6 +1,5 @@
 <?php namespace Captive\Notes\FormWidgets;
 
-use Log;
 use Response;
 use ApplicationException;
 use Backend\Classes\FormField;
@@ -221,7 +220,10 @@ class Notes extends FormWidgetBase
         if ($this->activeNoteId > 0) {
             return $this->getRelation()->withDeferred($this->sessionKey)->findOrFail($this->activeNoteId);
         } else {
-            return new Note;
+            $note = new Note([ 'name' => '', 'content' => '' ]);
+            $note->id = 0;
+            $note->updated_at = \Carbon\Carbon::now();
+            return $note;
         }
     }
 
@@ -307,6 +309,9 @@ class Notes extends FormWidgetBase
         }
 
         $noteModelList = $query->get();
+        if ( empty($key) && $noteModelList->count() === 0 ){
+            $noteModelList = [$this->getFormWidget()->model];
+        }
 
         $result = [];
         foreach ($noteModelList as  $noteModel) {
@@ -355,7 +360,7 @@ class Notes extends FormWidgetBase
 
         $abstract = '';
         foreach ($lines as $line) {
-            $line = trim($line,'&nbsp;');
+            $line = trim(str_replace("&nbsp;", '', $line));
             if ( $line !== "\t" && $line !== $name ){
                 $len = strlen($line);
                 if ($len > 0) {

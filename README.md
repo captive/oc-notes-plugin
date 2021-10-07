@@ -42,3 +42,19 @@ public $morphMany = [
     'notes' => [\Captive\Notes\Models\Note::class, 'name' => 'target']
 ];
 ```
+
+
+# 2.0
+
+To Support OctoberCMS Vue components
+``` js
+// richeditor.js
+RichEditor.prototype.init = function() {
+    //...
+    if (!this.options.legacyMode) {
+        this.initVueConnector();
+        return;
+    }
+}
+
+```

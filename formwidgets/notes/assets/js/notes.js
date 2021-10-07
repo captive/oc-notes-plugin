@@ -61,15 +61,22 @@
         this.disposeRichEditor();
         this.$richEditorTextarea = this.$el.find('> .row > .field-notes-form  textarea:first');
         if (this.$richEditorTextarea == null || this.$richEditorTextarea.length == 0) return;
-        if (!this.options.previewMode) {
-            this.$richEditorTextarea.on('froalaEditor.contentChanged', this.proxy(this.onAutoSavingNote));
-            this.$richEditorTextarea.on('keydown.oc.richeditor', this.proxy(this.stopDelaySaving));
-        }
+        this.$richEditorTextarea.on('keydown.oc.richeditor', this.proxy(this.stopDelaySaving));
+        const self = this;
+        $(document).ready(function(){
+            self.$vueRichEditorTextarea = self.$el.find('> .row > .field-notes-form  textarea.editor-element:first');
+            if (self.$vueRichEditorTextarea == null || self.$vueRichEditorTextarea.length == 0) return;
+            if (!self.options.previewMode) {
+                self.$vueRichEditorTextarea.on('froalaEditor.contentChanged.richeditor', self.proxy(self.onAutoSavingNote));
+            }
+        });
     }
     Notes.prototype.disposeRichEditor = function () {
         if (this.$richEditorTextarea == null || this.$richEditorTextarea.length == 0) return;
         if (!this.options.previewMode) {
-            this.$richEditorTextarea.off('froalaEditor.contentChanged', this.proxy(this.onAutoSavingNote) );
+            if (this.$vueRichEditorTextarea != null && this.$vueRichEditorTextarea.length != 0 ) {
+                this.$vueRichEditorTextarea.off('froalaEditor.contentChanged.richeditor', this.proxy(this.onAutoSavingNote) );
+            }
             this.$richEditorTextarea.off('keydown.oc.richeditor', this.proxy(this.stopDelaySaving));
             this.$richEditorTextarea  = null;
         }

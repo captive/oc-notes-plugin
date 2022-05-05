@@ -112,7 +112,7 @@
 
 
         let self = this;
-        $(window).load(function(){
+        $(window).on('load', function(){
             // The first time loading, need to refresh the richeditor.
             // Because it is invoked by <?= $this->makePartial('note_content'); ?> in _notes.htm
             self.setLastSavingNoteData();

@@ -151,7 +151,6 @@
         this.$el.off('keydown', '> .row > .field-notes-form  input:first' , this.proxy(this.disableEnterSubmit) );
 
         this.unbindOldHotkeyElements();
-        this.$el.hotKey('dispose');
 
         this.$el.off('dispose-control', this.proxy(this.dispose));
         this.$el.removeData('oc.notes');

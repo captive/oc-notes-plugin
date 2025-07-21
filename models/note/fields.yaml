@@ -27,8 +27,6 @@ fields:
             - '|'
             - 'insertTable'
             - 'insertLink'
-            - 'insertImage'
-            - 'insertVideo'
             - '|'
             - 'clearFormatting'
             - 'html'

@@ -67,15 +67,34 @@
             self.$vueRichEditorTextarea = self.$el.find('> .row > .field-notes-form  textarea.editor-element:first');
             if (self.$vueRichEditorTextarea == null || self.$vueRichEditorTextarea.length == 0) return;
             if (!self.options.previewMode) {
-                self.$vueRichEditorTextarea.on('froalaEditor.contentChanged.richeditor', self.proxy(self.onAutoSavingNote));
+                // Use the standard OctoberCMS 4.x RichEditor event
+                self.$vueRichEditorTextarea.on('froalaEditor.contentChanged', self.proxy(self.onAutoSavingNote));
             }
         });
+    }
+
+    Notes.prototype.ensureRichEditorToolbar = function() {
+        // Check if RichEditor toolbar is empty and try to reinitialize
+        let toolbar = this.$el.find('> .row > .field-notes-form .fr-toolbar');
+        let buttons = toolbar.find('.fr-command');
+        
+        if (toolbar.length > 0 && buttons.length === 0) {
+            // Toolbar exists but has no buttons - try to reinitialize
+            let richEditorField = this.$el.find('> .row > .field-notes-form [data-control="richeditor"]');
+            if (richEditorField.length > 0) {
+                let richEditorWidget = richEditorField.data('oc.richEditor');
+                if (richEditorWidget && richEditorWidget.editor) {
+                    // Force refresh the toolbar
+                    richEditorWidget.editor.toolbar.refresh();
+                }
+            }
+        }
     }
     Notes.prototype.disposeRichEditor = function () {
         if (this.$richEditorTextarea == null || this.$richEditorTextarea.length == 0) return;
         if (!this.options.previewMode) {
             if (this.$vueRichEditorTextarea != null && this.$vueRichEditorTextarea.length != 0 ) {
-                this.$vueRichEditorTextarea.off('froalaEditor.contentChanged.richeditor', this.proxy(this.onAutoSavingNote) );
+                this.$vueRichEditorTextarea.off('froalaEditor.contentChanged', this.proxy(this.onAutoSavingNote) );
             }
             this.$richEditorTextarea.off('keydown.oc.richeditor', this.proxy(this.stopDelaySaving));
             this.$richEditorTextarea  = null;
@@ -96,10 +115,9 @@
         this.$el.on('ajaxDone', '> .row > .toolbar  [data-note-remove]', this.proxy(this.onNoteRemoveSuccess));
 
         // For note auto saving
-        // this.$el.on('change', '> .row > .field-notes-form  textarea:first', this.proxy(this.onAutoSavingNote));
         this.initRichEditor();
         this.$el.on('keyup', '> .row > .field-notes-form  input:first' , this.proxy(this.onAutoSavingNoteName) );
-        this.$el.on('keydown', '> .row > .field-notes-form  input:first' , this.proxy(this.disableEnterSubmit) );
+        this.$el.on('keydown', '> .row > .field-notes-form  input:first' , this.proxy(this.onTitleKeyDown) );
             /*
             * Hotkeys
             */
@@ -120,12 +138,21 @@
             //Disable the create/delete button when there is only one 'new note' left
             self.resetRemoveNoteButtonEnable();
             self.resetCreateNewNoteButtonEnable();
+            
+            // Force RichEditor initialization in create mode (when toolbar has no buttons)
+            setTimeout(function() {
+                self.ensureRichEditorToolbar();
+            }, 500);
         });
 
 
 
         this.$el.on('dispose-control', this.proxy(this.dispose))
 
+        let $form = this.$el.closest('form');
+        if ($form.length > 0) {
+            $form.on('submit.notes', this.proxy(this.onFormSubmit));
+        }
 
     }
 
@@ -148,9 +175,14 @@
 
         this.disposeRichEditor();
         this.$el.off('keyup', '> .row > .field-notes-form  input:first' , this.proxy(this.onAutoSavingNoteName) );
-        this.$el.off('keydown', '> .row > .field-notes-form  input:first' , this.proxy(this.disableEnterSubmit) );
+        this.$el.off('keydown', '> .row > .field-notes-form  input:first' , this.proxy(this.onTitleKeyDown) );
 
         this.unbindOldHotkeyElements();
+
+        let $form = this.$el.closest('form');
+        if ($form.length > 0) {
+            $form.off('submit.notes', this.proxy(this.onFormSubmit));
+        }
 
         this.$el.off('dispose-control', this.proxy(this.dispose));
         this.$el.removeData('oc.notes');
@@ -184,29 +216,43 @@
 
     Notes.prototype.onSearchInputFocus = function(ev){
         if (this.$savingTimeout == null ) return true;
-        const target = ev.target;
-        target.blur();
-        this.finishSavingProcess(function(){
-            const $target = $(target);
-            const val = $target.val();
-            $target.val('');
-            $target.val(val);
-            $target.focus();
-        });
-        return false;
+        try {
+            const target = ev.target;
+            if (!target) return true;
+            
+            target.blur();
+            this.finishSavingProcess(function(){
+                const $target = $(target);
+                const val = $target.val();
+                $target.val('');
+                $target.val(val);
+                $target.focus();
+            });
+            return false;
+        } catch (e) {
+            console.warn('Error in onSearchInputFocus:', e);
+            return true;
+        }
     }
     Notes.prototype.onSearchInputClearButtonFocus = function(ev){
         if (this.$savingTimeout == null ) return true;
-        const target = ev.target;
-        target.blur();
-        target.disabled = true;
-        this.finishSavingProcess(function(){
-            target.focus();
-            target.disabled = false;
-        }, function(){
-            target.disabled = false;
-        });
-        return false;
+        try {
+            const target = ev.target;
+            if (!target) return true;
+            
+            target.blur();
+            target.disabled = true;
+            this.finishSavingProcess(function(){
+                target.focus();
+                target.disabled = false;
+            }, function(){
+                target.disabled = false;
+            });
+            return false;
+        } catch (e) {
+            console.warn('Error in onSearchInputClearButtonFocus:', e);
+            return true;
+        }
     }
 
     /**
@@ -215,6 +261,11 @@
      * @param hotkey hotkey @see input.hotkey.js
      */
     Notes.prototype.removeConflictHotKeys = function(hotkey) {
+        // Add null check for OctoberCMS 4.x compatibility
+        if (!hotkey || !hotkey.options || !hotkey.options.hotkey) {
+            return '';
+        }
+        
         let result = [];
         const keys = hotkey.options.hotkey.toLowerCase().split(',');
         for (var i = 0, len = keys.length; i < len; i++) {
@@ -264,19 +315,27 @@
         {
             elem = $(elem);
             if(elem != self.$el){
-                let oldHotkeyString = elem.data('hotkey').toLowerCase();
-                if ( self.hasConflictHotKeys(oldHotkeyString) ){
+                let oldHotkeyString = elem.data('hotkey');
+                if (oldHotkeyString && self.hasConflictHotKeys(oldHotkeyString.toLowerCase()) ){
                     let hotkey = elem.data('oc.hotkey');
+                    // Skip if hotkey widget not found (OctoberCMS 4.x compatibility)
+                    if (!hotkey) {
+                        return; // continue to next element
+                    }
                     let newHotKeyString = self.removeConflictHotKeys(hotkey);
-                    let oldCallback = hotkey.options.callback;
+                    let oldCallback = hotkey.options ? hotkey.options.callback : null;
                     if(newHotKeyString){
                         // The button or a has other hotkeys
-                        hotkey.options.hotkey = newHotKeyString;
-                        hotkey.unregisterHandlers();
-                        hotkey.init();
+                        if (hotkey.options) {
+                            hotkey.options.hotkey = newHotKeyString;
+                            if (hotkey.unregisterHandlers) hotkey.unregisterHandlers();
+                            if (hotkey.init) hotkey.init();
+                        }
                     }else{
                         // can not init a new hotkey, because it is empty
-                        hotkey.options.callback = null;
+                        if (hotkey.options) {
+                            hotkey.options.callback = null;
+                        }
                     }
                     self.$oldHotkeyElements.push({
                         elem : elem,
@@ -310,22 +369,29 @@
     }
 
     Notes.prototype.testNoteOnFocus = function() {
-        const focusElem = document.activeElement;
-        const nameInput = this.$el.find('> .row > .field-notes-form  input:first');
-        if (nameInput[0] == focusElem) {
-            return true;
+        try {
+            const focusElem = document.activeElement;
+            if (!focusElem) return false;
+            
+            const nameInput = this.$el.find('> .row > .field-notes-form  input:first');
+            if (nameInput.length > 0 && nameInput[0] == focusElem) {
+                return true;
+            }
+
+            //control-richeditor
+            let div = focusElem.parentElement;
+            if(div) { div = div.parentElement; }
+
+            return div && $(div).hasClass('control-richeditor')
+        } catch (e) {
+            console.warn('Error in testNoteOnFocus:', e);
+            return false;
         }
-
-        //control-richeditor
-        let div = focusElem.parentElement;
-        if(div) { div = div.parentElement; }
-
-        return div && $(div).hasClass('control-richeditor')
     }
 
     Notes.prototype.onCommandSaving = function (element, target, ev) {
 
-        // Do not need to test conditions;
+        // Only handle Ctrl+S/Cmd+S if the focus is within the notes widget
         if (this.testNoteOnFocus()) {
             this.stopDelaySaving();
             if (this.testSelectedNote()) {
@@ -335,9 +401,10 @@
             return false;
         }
 
-        // call the old binding callback, such as Save button
+        // If focus is not on notes, let the default form save behavior work
+        // First try to call the original form save handlers
         for (let item of this.$oldHotkeyElements){
-            let key = ev.originalEvent.ctrlKey ? 'ctl+s' : 'cmd+s';
+            let key = ev.originalEvent.ctrlKey ? 'ctrl+s' : 'cmd+s';
             // Maybe the button or a only binding with ctrl+s or cmd+s
             if (this.hasConflictHotKeys(item.oldHotKeyString , key)){
                 let elem = item.elem;
@@ -346,10 +413,13 @@
                 let oldCallback = item.callback;
                 if (oldCallback &&  ! (hotkey.options.hotkeyVisible && !hotkey.$el.is(':visible')) ){
                     oldCallback(elem, target, ev);
+                    return false; // Important: return false to prevent default after calling callback
                 }
             }
         }
-        return false;
+        
+        // If no old handlers, allow the default form save to proceed
+        return true; // Changed from false to true to allow default behavior
 
 
     }
@@ -400,6 +470,33 @@
         this.setLastSavingNoteData(this.getNoteData());
         this.resetCreateNewNoteButtonEnable();
         this.resetRemoveNoteButtonEnable();
+    }
+
+    /**
+     * Handle form submission - ensure any pending notes are saved first
+     */
+    Notes.prototype.onFormSubmit = function(ev) {
+        // Only interfere if there's actually a pending note save
+        if (this.$savingTimeout != null && this.testNoteOnFocus()) {
+            ev.preventDefault(); // Prevent form submission until notes are saved
+            
+            var self = this;
+            this.finishSavingProcess(function() {
+                // After notes are saved, resubmit the form
+                var $form = $(ev.target);
+                $form.off('submit.notes'); // Remove our handler to prevent loop
+                
+                // Use setTimeout to avoid recursion issues
+                setTimeout(function() {
+                    $form[0].submit(); // Use native submit to bypass jQuery handlers
+                }, 100);
+            });
+            
+            return false;
+        }
+        
+        // If no pending save or not focused on notes, allow normal form submission
+        return true;
     }
 
 
@@ -542,14 +639,27 @@
     }
 
     Notes.prototype.clickDeleteButton = function (ev) {
-
-        let target = $(ev.target);
-        let noteData = this.getSelectedNoteIdData();
-        if (noteData){
-            target.data('request-data', noteData);
-            //Do not need to save anything
-            this.stopDelaySaving();
-            $(target).request( this.makeEventHandler('onNoteDelete'));
+        let noteId = this.getActiveNoteID(); // Get the actual numeric ID
+        
+        if (noteId && noteId > 0){
+            let self = this;
+            
+            // Show OctoberCMS styled confirmation dialog
+            $.oc.confirm('Are you sure you want to delete this note?', function() {
+                //Do not need to save anything
+                self.stopDelaySaving();
+                
+                // Use $.request with data parameter like other AJAX calls in this plugin
+                $.request(self.makeEventHandler('onNoteDelete'), {
+                    data: { id: noteId },
+                    success: function(data, textStatus, jqXHR) {
+                        self.onNoteRemoveSuccess();
+                    },
+                    error: function(jqXHR, textStatus, error) {
+                        // Handle error - will show the default error message
+                    }
+                });
+            });
         }
         // To prevent the form submit, because it is a button inside the form
         ev.preventDefault();
@@ -743,6 +853,7 @@
         this.stopDelaySaving();
         this.setDefaultNoteName();
         const self = this;
+        
         // create a new timer;
         this.$savingTimeout = setTimeout(function() {
             if (self.testSelectedNote() && self.testSavingConditions()) {
@@ -762,6 +873,32 @@
             this.setDefaultNoteName();
         }
         this.onAutoSavingNote(ev);
+    }
+
+    Notes.prototype.onTitleKeyDown = function(ev){
+        // Handle Enter key - prevent form submission
+        if (ev.keyCode == 13 || ev.which == 13) {
+            ev.preventDefault();
+            return ev;
+        }
+        
+        // Handle Tab key - focus on RichEditor instead of toolbar buttons
+        if (ev.keyCode == 9 || ev.which == 9) {
+            ev.preventDefault();
+            
+            // Find the RichEditor and focus on it
+            let richEditor = this.$el.find('> .row > .field-notes-form .fr-element');
+            if (richEditor.length > 0) {
+                richEditor.focus();
+            } else {
+                // Fallback: try to find the textarea
+                let textarea = this.$el.find('> .row > .field-notes-form textarea:first');
+                if (textarea.length > 0) {
+                    textarea.focus();
+                }
+            }
+            return false;
+        }
     }
 
     Notes.prototype.disableEnterSubmit = function(ev){
@@ -789,9 +926,16 @@
      * @param int time The amount of time, in milliseconds, to show the message animation.
      */
     Notes.prototype.showNotification = function(message, autoClose = true , time = 3000 ) {
+        if (this.$notification.length === 0) {
+            return;
+        }
+        
         this.$notification.find('.loading-indicator div').text(message);
         if(this.$notificationTimeout) clearTimeout(this.$notificationTimeout);
-        this.$notification.show();
+        
+        // Remove hidden attribute and show
+        this.$notification.removeAttr('hidden').show();
+        
         if (autoClose){
             let self = this;
             this.$notificationTimeout = setTimeout(function(){

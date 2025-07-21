@@ -1,4 +1,4 @@
-<?php namespace Captive\Skynet\Updates;
+<?php namespace Captive\Notes\Updates;
 
 use Schema;
 use October\Rain\Database\Updates\Migration;

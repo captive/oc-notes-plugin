@@ -8,3 +8,33 @@ fields:
         type: richeditor
         label: ''
         stretch: true
+        toolbarButtons:
+            - 'paragraphFormat'
+            - '|'
+            - 'align'
+            - '|'
+            - 'bold'
+            - 'italic'
+            - 'underline'
+            - 'strikeThrough'
+            - '|'
+            - 'color'
+            - '|'
+            - 'formatOL'
+            - 'formatUL'
+            - 'outdent'
+            - 'indent'
+            - '|'
+            - 'insertTable'
+            - 'insertLink'
+            - 'insertImage'
+            - 'insertVideo'
+            - '|'
+            - 'clearFormatting'
+            - 'html'
+            - '|'
+            - 'undo'
+            - 'redo'
+        options:
+            initOnClick: false
+            heightMin: 200

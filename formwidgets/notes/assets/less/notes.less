@@ -1,12 +1,10 @@
-@list_background_color: #ededed;
-@content_background_color: #ecf0f1;
+// OctoberCMS 4.x Dark Mode Support - Using CSS custom properties that adapt to themes
 @height: 560px;
 
 @list_title_font_size: 13px;
 @list_title_highlight_font_size: 24px;
 @list_date_font_size: 11px;
 @list_item_height: 36px;
-@list_item_active_background: #d0d9dd;
 
 @content_font_size : 16px;
 
@@ -54,13 +52,25 @@
 }
 
 .field-notes {
+    // Default theme colors that work with OctoberCMS 4.x
+    --notes-list-bg: var(--bs-gray-100, #f8f9fa);
+    --notes-content-bg: var(--bs-body-bg, #ffffff);
+    --notes-text: var(--bs-body-color, #212529);
+    --notes-text-muted: var(--bs-secondary-color, #6c757d);
+    --notes-border: var(--bs-border-color, #dee2e6);
+    --notes-hover: var(--bs-primary, #0d6efd);
+    --notes-item-active: var(--bs-gray-200, #e9ecef);
+    --notes-btn-bg: var(--bs-body-bg, #ffffff);
+    --notes-btn-border: var(--bs-border-color, #dee2e6);
+
     &.form-group-preview{
         .toolbar {
             .btn-icon {
                 visibility: hidden;
             }
             input {
-                background-color: white;
+                background-color: var(--notes-content-bg);
+                color: var(--notes-text);
             }
         }
     }
@@ -71,38 +81,45 @@
 
         [class*=" oc-icon-"]:before {
             margin-right: 0 !important;
-            color: black;
+            color: var(--notes-text);
             vertical-align: middle;
         }
 
         [class*=" oc-icon-"]:hover:before {
-            color:white;
+            color: #ffffff;
         }
         [class*=" oc-icon-"]:disabled:before {
-            color: fade(black, 30%);
+            color: var(--notes-text-muted);
         }
 
         .btn-icon {
             height: 1.5em;
             width: 2em;
             line-height: 1;
-            background: #ffffff;
+            background: var(--notes-btn-bg);
             border-radius: 3px;
             margin-right: 1em;
-            border: 1px solid #d1d6da;
+            border: 1px solid var(--notes-btn-border);
+            color: var(--notes-text);
         }
         .btn-icon:hover{
-            background: #4390d2;
+            background: var(--notes-hover);
         }
         .btn-icon:hover:disabled {
-            background: white;
+            background: var(--notes-btn-bg);
         }
 
+        // Search input styling
+        input[type="text"] {
+            background: var(--notes-content-bg) !important;
+            color: var(--notes-text) !important;
+            border-color: var(--notes-border) !important;
+        }
     }
+    
     .field-notes-list {
-        background: @list_background_color;
+        background: var(--notes-list-bg);
         max-height: @height;
-
         padding-left: 0px;
         padding-right: 0px;
         position: relative;
@@ -119,19 +136,21 @@
             >li {
                 display: list-item;
                 cursor: pointer;
-                border-bottom: 1px solid #ccc;
+                border-bottom: 1px solid var(--notes-border);
 
                 div {
                     font-size: @list_title_font_size;
                     h3 {
                         font-size: @list_title_font_size;
                         word-wrap:break-word;
+                        color: var(--notes-text);
                     }
 
                     h4 {
                         font-size: @list_date_font_size;
+                        color: var(--notes-text-muted);
                         span {
-                            color: fade(black, 50%);
+                            color: var(--notes-text-muted);
                         }
                     }
                 }
@@ -149,7 +168,7 @@
             }
 
             .checked {
-                background: @list_item_active_background;
+                background: var(--notes-item-active);
                 h3 {
                     font-weight: bold;
                     font-size: @list_title_highlight_font_size;
@@ -166,7 +185,7 @@
 
             >li a {
                 text-decoration: none;
-                color: #000;
+                color: var(--notes-text);
                 display: block;
                 padding-left: 15px;
                 padding-right: 15px;
@@ -185,18 +204,26 @@
                     -ms-transition: font-size 0.3s ease, background-color 0.3s ease;
                     transition: font-size 0.3s ease, background-color 0.3s ease;
                     font-weight: bold;
+                    // Use theme accent color for note titles
+                    color: var(--bs-primary, #007bff);
                 }
-
             }
         }
     }
 
     .field-notes-form {
-        background: @content_background_color;
+        background: var(--notes-content-bg);
         height: @height;
         font-size: @content_font_size;
         padding: 15px;
         position: relative;
+
+        // Input field styling
+        input[type="text"] {
+            background: var(--notes-content-bg) !important;
+            color: var(--notes-text) !important;
+            border-color: var(--notes-border) !important;
+        }
 
         >.content{
             height: 100%;
@@ -204,7 +231,35 @@
                 height: 100%;
                 .field-richeditor {
                     height: ~"calc(100% - 58px) !important";
+                    
+                    // Fix RichEditor cursor issue
+                    .form-control {
+                        height: 100% !important;
+                        min-height: 300px !important;
+                    }
+                    
+                    // Ensure the editor iframe has proper height
+                    iframe {
+                        height: 100% !important;
+                        min-height: 300px !important;
+                    }
+                    
+                    // Fix for Froala editor
+                    .fr-box {
+                        height: 100% !important;
+                        
+                        .fr-wrapper {
+                            height: ~"calc(100% - 40px)" !important;
+                        }
+                        
+                        .fr-element {
+                            height: 100% !important;
+                            min-height: 250px !important;
+                            padding: 10px !important;
+                        }
+                    }
                 }
+                
                 .form-group-preview {
                     > span {
                         white-space: nowrap;
@@ -221,12 +276,11 @@
             }
 
             .loading-indicator{
-                background: @content_background_color;
+                background: var(--notes-content-bg);
             }
         }
 
         .field-notes-notification {
-
             position: absolute;
             bottom: 15px;
             left: 25px;
@@ -236,4 +290,305 @@
             }
         }
     }
+}
+
+// Theme-specific overrides to ensure proper color adaptation
+// Dark mode detection
+html[data-bs-theme="dark"] .field-notes,
+body.layout-dark .field-notes,
+.theme-dark .field-notes,
+[data-color-scheme="dark"] .field-notes {
+    --notes-list-bg: #2d3748;
+    --notes-content-bg: #1a202c;
+    --notes-text: #f7fafc;
+    --notes-text-muted: #a0aec0;
+    --notes-border: #4a5568;
+    --notes-item-active: #4a5568;
+    --notes-btn-bg: #4a5568;
+    --notes-btn-border: #718096;
+}
+
+// Color preset adaptations - these will override for specific themes
+// Punch theme
+.skin-punch .field-notes {
+    --notes-hover: #e53e3e;
+    --notes-item-active: rgba(229, 62, 62, 0.1);
+}
+
+// Oxford theme  
+.skin-oxford .field-notes {
+    --notes-hover: #3182ce;
+    --notes-item-active: rgba(49, 130, 206, 0.1);
+}
+
+// Console theme
+.skin-console .field-notes {
+    --notes-hover: #38a169;
+    --notes-item-active: rgba(56, 161, 105, 0.1);
+}
+
+// Valentino theme
+.skin-valentino .field-notes {
+    --notes-hover: #805ad5;
+    --notes-item-active: rgba(128, 90, 213, 0.1);
+}
+
+// Classic theme
+.skin-classic .field-notes {
+    --notes-hover: #3182ce;
+    --notes-item-active: rgba(49, 130, 206, 0.1);
+}
+
+// Better focus states for accessibility
+.field-notes {
+    .field-notes-form input:focus,
+    .field-notes-form textarea:focus {
+        border-color: var(--notes-hover) !important;
+        box-shadow: 0 0 0 1px var(--notes-hover) !important;
+    }
+    
+    // Hover states for list items
+    .field-notes-list ul li:hover {
+        background-color: var(--notes-item-active);
+    }
+    
+    // Scrollbar styling for all themes
+    .field-notes-list ul {
+        scrollbar-width: thin;
+        scrollbar-color: var(--notes-border) transparent;
+        
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+            background-color: var(--notes-border);
+            border-radius: 4px;
+        }
+        
+        &::-webkit-scrollbar-thumb:hover {
+            background-color: var(--notes-text-muted);
+        }
+    }
+    
+    // Rich editor compatibility and cursor fix
+    .form-control {
+        background-color: var(--notes-content-bg) !important;
+        color: var(--notes-text) !important;
+        border-color: var(--notes-border) !important;
+    }
+    
+    // Additional RichEditor fixes for proper interaction
+    .field-richeditor {
+        // Ensure the editor container is clickable everywhere
+        .fr-box .fr-element {
+            cursor: text !important;
+        }
+        
+        // Make sure the entire editor area is clickable
+        .fr-wrapper {
+            position: relative !important;
+        }
+        
+        // Improve editor focus behavior
+        .fr-element:focus {
+            outline: none !important;
+            border-color: var(--notes-hover) !important;
+        }
+        
+        // Fix for editor toolbar in dark themes
+        .fr-toolbar {
+            background: var(--notes-content-bg) !important;
+            border-color: var(--notes-border) !important;
+            
+            .fr-command {
+                color: var(--notes-text) !important;
+            }
+        }
+    }
+}
+
+// Theme-specific note title colors following each color preset
+[data-theme-color="punch"] .field-notes .field-notes-list ul li a h3 {
+    color: #e91e63 !important; // Punch pink
+}
+
+[data-theme-color="ocean"] .field-notes .field-notes-list ul li a h3 {
+    color: #00bcd4 !important; // Ocean cyan
+}
+
+[data-theme-color="fuchsia"] .field-notes .field-notes-list ul li a h3 {
+    color: #e91e63 !important; // Fuchsia magenta
+}
+
+[data-theme-color="purple"] .field-notes .field-notes-list ul li a h3 {
+    color: #9c27b0 !important; // Purple
+}
+
+[data-theme-color="orange"] .field-notes .field-notes-list ul li a h3 {
+    color: #ff9800 !important; // Orange
+}
+
+[data-theme-color="indigo"] .field-notes .field-notes-list ul li a h3 {
+    color: #3f51b5 !important; // Indigo
+}
+
+[data-theme-color="yellow"] .field-notes .field-notes-list ul li a h3 {
+    color: #ffc107 !important; // Yellow
+}
+
+[data-theme-color="green"] .field-notes .field-notes-list ul li a h3,
+[data-theme-color="console"] .field-notes .field-notes-list ul li a h3,
+[data-theme-color*="green"] .field-notes .field-notes-list ul li a h3,
+[data-theme-color*="console"] .field-notes .field-notes-list ul li a h3,
+.theme-green .field-notes .field-notes-list ul li a h3,
+.theme-console .field-notes .field-notes-list ul li a h3,
+body[class*="green"] .field-notes .field-notes-list ul li a h3,
+body[class*="console"] .field-notes .field-notes-list ul li a h3 {
+    color: #4caf50 !important; // Green
+}
+
+[data-theme-color="black"] .field-notes .field-notes-list ul li a h3 {
+    color: #6c757d !important; // Gray for black theme
+}
+
+// Theme-specific focus states and borders for all color presets
+[data-theme-color="punch"] .field-notes {
+    --notes-hover: #e91e63 !important;
+    --notes-item-active: rgba(233, 30, 99, 0.1) !important;
+    .field-notes-form input:focus, .field-notes-form textarea:focus {
+        border-color: #e91e63 !important;
+        box-shadow: 0 0 0 1px #e91e63 !important;
+    }
+}
+
+[data-theme-color="ocean"] .field-notes {
+    --notes-hover: #00bcd4 !important;
+    --notes-item-active: rgba(0, 188, 212, 0.1) !important;
+    .field-notes-form input:focus, .field-notes-form textarea:focus {
+        border-color: #00bcd4 !important;
+        box-shadow: 0 0 0 1px #00bcd4 !important;
+    }
+}
+
+[data-theme-color="fuchsia"] .field-notes {
+    --notes-hover: #e91e63 !important;
+    --notes-item-active: rgba(233, 30, 99, 0.1) !important;
+    .field-notes-form input:focus, .field-notes-form textarea:focus {
+        border-color: #e91e63 !important;
+        box-shadow: 0 0 0 1px #e91e63 !important;
+    }
+}
+
+[data-theme-color="purple"] .field-notes {
+    --notes-hover: #9c27b0 !important;
+    --notes-item-active: rgba(156, 39, 176, 0.1) !important;
+    .field-notes-form input:focus, .field-notes-form textarea:focus {
+        border-color: #9c27b0 !important;
+        box-shadow: 0 0 0 1px #9c27b0 !important;
+    }
+}
+
+[data-theme-color="orange"] .field-notes {
+    --notes-hover: #ff9800 !important;
+    --notes-item-active: rgba(255, 152, 0, 0.1) !important;
+    .field-notes-form input:focus, .field-notes-form textarea:focus {
+        border-color: #ff9800 !important;
+        box-shadow: 0 0 0 1px #ff9800 !important;
+    }
+}
+
+[data-theme-color="indigo"] .field-notes {
+    --notes-hover: #3f51b5 !important;
+    --notes-item-active: rgba(63, 81, 181, 0.1) !important;
+    .field-notes-form input:focus, .field-notes-form textarea:focus {
+        border-color: #3f51b5 !important;
+        box-shadow: 0 0 0 1px #3f51b5 !important;
+    }
+}
+
+[data-theme-color="yellow"] .field-notes {
+    --notes-hover: #ffc107 !important;
+    --notes-item-active: rgba(255, 193, 7, 0.1) !important;
+    .field-notes-form input:focus, .field-notes-form textarea:focus {
+        border-color: #ffc107 !important;
+        box-shadow: 0 0 0 1px #ffc107 !important;
+    }
+}
+
+[data-theme-color="green"],
+[data-theme-color="console"],
+[data-theme-color*="green"],
+[data-theme-color*="console"],
+.theme-green,
+.theme-console {
+    .field-notes {
+        --notes-hover: #4caf50 !important;
+        --notes-item-active: rgba(76, 175, 80, 0.1) !important;
+        
+        .field-notes-form input:focus,
+        .field-notes-form textarea:focus {
+            border-color: #4caf50 !important;
+            box-shadow: 0 0 0 1px #4caf50 !important;
+        }
+    }
+}
+
+// Additional fallback for green/console themes
+body[class*="green"] .field-notes,
+body[class*="console"] .field-notes {
+    --notes-hover: #4caf50 !important;
+    --notes-item-active: rgba(76, 175, 80, 0.1) !important;
+    
+    .field-notes-form input:focus,
+    .field-notes-form textarea:focus {
+        border-color: #4caf50 !important;
+        box-shadow: 0 0 0 1px #4caf50 !important;
+    }
+}
+
+[data-theme-color="black"] .field-notes {
+    --notes-hover: #6c757d !important;
+    --notes-item-active: rgba(108, 117, 125, 0.1) !important;
+    .field-notes-form input:focus, .field-notes-form textarea:focus {
+        border-color: #6c757d !important;
+        box-shadow: 0 0 0 1px #6c757d !important;
+    }
+}
+
+// Default theme (blue)
+.field-notes .field-notes-list ul li a h3 {
+    color: var(--bs-primary, #007bff) !important;
+}
+
+/* Force cache refresh for green/console theme fix */
+
+// Bootstrap theme-based selectors for Console theme
+[data-bs-theme="console"] .field-notes .field-notes-list ul li a h3,
+[data-bs-theme="green"] .field-notes .field-notes-list ul li a h3,
+[data-bs-theme*="console"] .field-notes .field-notes-list ul li a h3,
+[data-bs-theme*="green"] .field-notes .field-notes-list ul li a h3,
+.theme-console .field-notes .field-notes-list ul li a h3,
+.theme-green .field-notes .field-notes-list ul li a h3 {
+    color: #4caf50 !important; // Green for Console theme
+}
+
+[data-bs-theme="console"] .field-notes .field-notes-form input:focus,
+[data-bs-theme="green"] .field-notes .field-notes-form input:focus,
+[data-bs-theme*="console"] .field-notes .field-notes-form input:focus,
+[data-bs-theme*="green"] .field-notes .field-notes-form input:focus,
+.theme-console .field-notes .field-notes-form input:focus,
+.theme-green .field-notes .field-notes-form input:focus,
+[data-bs-theme="console"] .field-notes .field-notes-form textarea:focus,
+[data-bs-theme="green"] .field-notes .field-notes-form textarea:focus,
+[data-bs-theme*="console"] .field-notes .field-notes-form textarea:focus,
+[data-bs-theme*="green"] .field-notes .field-notes-form textarea:focus,
+.theme-console .field-notes .field-notes-form textarea:focus,
+.theme-green .field-notes .field-notes-form textarea:focus {
+    border-color: #4caf50 !important;
+    box-shadow: 0 0 0 1px #4caf50 !important;
 }

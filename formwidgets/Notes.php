@@ -5,6 +5,7 @@ use ApplicationException;
 use Backend\Classes\FormField;
 use Backend\Classes\FormWidgetBase;
 use October\Rain\Html\HtmlBuilder;
+use Illuminate\Support\Str;
 
 use Captive\Notes\Models\Note;
 
@@ -127,6 +128,11 @@ class Notes extends FormWidgetBase
         $config->model = $this->getActiveNote();
         $config->arrayName = $this->getFieldName();
         $config->isNested = true;
+        
+        // Ensure session key is available for RichEditor initialization
+        if ($this->sessionKey) {
+            $config->sessionKey = $this->sessionKey;
+        }
 
         // Initialize the Form widget
         $this->formWidget = $this->makeWidget('Backend\Widgets\Form', $config);
@@ -161,7 +167,9 @@ class Notes extends FormWidgetBase
         $this->toolbarWidget->bindToController();
         $this->toolbarWidget->controller->addViewPath($this->viewPath);
         $this->toolbarWidget->cssClasses[] = 'list-header';
-        $this->toolbarWidget->previewMode = $this->previewMode;
+        
+        // Note: previewMode property removed in OctoberCMS 4.x
+        // Preview mode is now handled at the widget level, not toolbar level
 
         /*
          * Link the Search Widget to the Notes Widget
@@ -222,6 +230,12 @@ class Notes extends FormWidgetBase
             $note = new Note([ 'name' => '', 'content' => '' ]);
             $note->id = 0;
             $note->updated_at = \Carbon\Carbon::now();
+            
+            // Ensure the note has access to session key for proper form widget initialization
+            if ($this->sessionKey) {
+                $note->sessionKey = $this->sessionKey;
+            }
+            
             return $note;
         }
     }
@@ -353,7 +367,13 @@ class Notes extends FormWidgetBase
     public function onNoteDelete()
     {
         $note = $this->getActiveNote();
-        $note->delete();
+        
+        if ($note && $note->exists) {
+            $note->delete();
+            return Response::json(['success' => true]);
+        }
+        
+        throw new ApplicationException('Note not found or could not be deleted');
     }
 
     private function getContentAbstract($content = '', $name = '')
@@ -367,7 +387,7 @@ class Notes extends FormWidgetBase
             if ( $line !== "\t" && $line !== $name ){
                 $len = strlen($line);
                 if ($len > 0) {
-                    $abstract = $len == 15 ? $line :  str_limit($line, 12, '...');
+                    $abstract = $len == 15 ? $line :  Str::limit($line, 12, '...');
                     break;
                 }
             }
